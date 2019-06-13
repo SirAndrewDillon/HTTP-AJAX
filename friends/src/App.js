@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import { Route, Link } from 'react-router-dom';
-import FrontPage from './Components/Friend/FrontPage';
-import FriendPage from './Components/Friend/FriendPage';
+import FrontPage from './FrontPage';
+import FriendPage from './FriendPage';
 import axios from 'axios';
 import './App.css';
 
