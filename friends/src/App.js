@@ -1,84 +1,92 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
+import { Route, Link } from 'react-router-dom';
+import FrontPage from './Components/Friend/FrontPage';
+import FriendPage from './Components/Friend/FriendPage';
 import axios from 'axios';
-
-import FriendsList from './components/FriendPage';
-import NewFriend from './components/Friends';
-
 import './App.css';
 
 class App extends Component {
   constructor() {
     super();
     this.state = {
-      friends: [],
-      friend: {
-        name: '',
-        age: '',
-        email: ''
-      }
-    };
+      friendsData: [],
+      name: '',
+      age: '',
+      email: '',
+    }
+  }
+
+  // deleteHandler = (e) => {
+  //   axios.delete(`http://localhost:5000/friends/${}`)
+  // }
+
+  handleChange = (e) => {
+    e.preventDefault();
+    this.setState({ [e.target.name]: e.target.value})
+    console.log(e.target.value)
+  }
+
+  handleSubmit = (e) => {
+    // e.preventDefault();
+    const user = {
+      name: this.state.name,
+      age: parseInt(this.state.age),
+      email: this.state.email
+    }
+    console.log('handleSubmit()')
+    axios
+      .post('http://localhost:5000/friends', user)
+        .then(res => {
+          console.log(res)
+          console.log(res.data)
+        })
+      .catch(err => {
+        console.log(err)
+      })
   }
 
   componentDidMount() {
-    axios.get('http://localhost:5000/friends')
-      .then(response => this.setState({ friends: response.data }))
-      .catch(err => console.log(err));
-  }
+    console.log('component did mount!')
+    axios
+      .get('http://localhost:5000/friends')
+        .then((res) => {
+          this.setState({ friendsData: res.data })
+          console.log('Axios response received')
 
-  handleSetData = data => this.setState({ friends: data })
 
-  handleChange = e => {
-    this.setState({
-      friend: {
-        ...this.state.friend,
-        [e.target.name]: e.target.value
-      }
-    });
-  }
-
-  handleSubmitNewFriend = e => {
-    e.preventDefault();
-    axios.post('http://localhost:5000/friends', this.state.friend)
-      .then(response => {
-        this.setState({
-          friends: response.data,
-          friend: {
-            name: '',
-            age: '',
-            email: ''
-          }
-        });
-        console.log(response)
-      })
-      .catch(err => console.log(err));
-  }
-
-  handleDeleteFriend = (e, id) => {
-    e.preventDefault();
-    axios.delete(`http://localhost:5000/friends/${id}`)
-      .then(response => {
-        this.setState({
-          friends: response.data
         })
-      })
-      .catch(err => console.log(err));
-  };
+        .catch((err) => {
+          console.log('WARNING: error!', err)
+        })
+  }
 
   render() {
-    const { friends, friend } = this.state;
+    console.log(this.state)
     return (
-      <div className="App">
-        <NewFriend
-          newFriend={friend}
-          handleChange={this.handleChange}
-          submitNewFriend={this.handleSubmitNewFriend}
+      <div>
+        <div><Link className="HomeLink" to="/">Home</Link></div>
+        <Route
+          exact path="/"
+          render={props => (
+            <FrontPage 
+              {...props}
+              stateProps={this.state}
+              handleChange={this.handleChange}
+              handleSubmit={this.handleSubmit} 
+            /> 
+          )} 
         />
-        <FriendsList
-          friends={friends}
-          handleSetData={this.handleSetData}
-          handleDeleteFriend={this.handleDeleteFriend}
+        <Route 
+          path="/friends/:id"
+          render={props => (
+            <FriendPage 
+              {...props}
+              friendsData={this.state.friendsData}
+            />
+          )}
         />
       </div>
+        
     );
   }
 }
