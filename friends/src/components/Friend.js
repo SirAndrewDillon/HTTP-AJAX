@@ -1,70 +1,16 @@
-import React, { Component } from 'react';
-import axios from 'axios';
+import React from 'react';
+import { Link } from 'react-router-dom';  
+import './Friend.css';
 
-import EditFriend from './EditFriend';
-
-class Friend extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      editForm: false,
-      editFriend: {
-        name: '',
-        age: '',
-        email: ''
-      }
-    };
-  }
-
-  toggleForm = e => {
-    e.preventDefault();
-    this.setState({ editForm: !this.state.editForm });
-  };
-
-  editFriendHandler = e => {
-    this.setState({
-      editFriend: {
-        ...this.state.editFriend,
-        [e.target.name]: e.target.value
-      }
-    });
-  }
-
-  saveEditFriend = e => {
-    e.preventDefault();
-    axios.put(`http://localhost:5000/friends/${this.props.friend.id}`, this.state.editFriend)
-      .then(response => {
-        console.log(response);
-        this.props.handleSetData(response.data);
-        this.setState({
-          editFriend: {
-            name: '',
-            age: '',
-            email: ''
-          }
-        })
-      })
-      .catch(err => console.log(err));
-  }
-
-  render() {
-    const { friend, handleDeleteFriend } = this.props;
-    const { editForm, editFriend } = this.state;
-
+function Friend(props) {
+    console.log(props.friend)
     return (
-      <div>
-        <p>name: {friend.name}</p>
-        <p>age: {friend.age}</p>
-        <p>email: {friend.email}</p>
-
-        {editForm ? <EditFriend friend={editFriend} editFriendHandler={this.editFriendHandler} saveEditFriend={this.saveEditFriend} /> : null}
-
-        <button onClick={this.toggleForm}>Edit</button>
-        <button onClick={e => (handleDeleteFriend(e, friend.id))}>Delete</button>
-        <hr />
-      </div>
-    );
-  }
+        <div className="Friend">
+            <Link to={`/friends/${props.friend.id}`}><h1>{props.friend.name}</h1></Link>
+            <p><em>Age :</em> {props.friend.age}</p>
+            <p><em>Contact :</em> {props.friend.email}</p>
+        </div>
+    )
 }
 
 export default Friend;
