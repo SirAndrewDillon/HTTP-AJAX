@@ -1,57 +1,145 @@
 import React, { Component } from 'react';
-import { Route } from 'react-router-dom';
 import FriendsList from './components/FriendsList';
-import FriendInput from './components/FriendInput';
+import PostForm from './components/PostForm';
+import UpdateForm from './components/UpdateForm';
+import Menu from './components/Menu';
+import PostMessage from './components/PostMessage';
+import DeleteMessage from './components/DeleteMessage';
+import {Route} from 'react-router-dom';
 import axios from 'axios';
-import './App.css';
+import styled from 'styled-components';
+
+const AppContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+`;
+
+const InputFormContainer = styled.div`
+  max-width: 70%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 15px;
+`;
+
+const FixedMenu = styled.div`
+  position: fixed;
+`;
 
 class App extends Component {
-  constructor(props){
-    super(props);
+  constructor(){
+    super();
     this.state = {
       friends: [],
+      postSuccess: false,
+      deleteSuccess: false
     };
   }
+
   componentDidMount(){
-    axios('http://localhost:5000/friends')
-      .then(res => this.setState({ friends: res.data }))
-      .catch(err => { throw new Error(err) });
-  }
-  handleUpdateList = (friends) => {
-    this.setState({
-      friends,
-    })
-  }
-  handleEditFriend = (name, age, email, id) => {
-    axios.put(`http://localhost:5000/friends/${id}`, {
-      name,
-      age: Number(age),
-      email
-    })
-      .then(res => this.setState({ friends: res.data }) )
-      .catch(err => { throw new Error(err) });
-  }
-  handleDeleteFriend = (id) => {
-    axios.delete(`http://localhost:5000/friends/${id}`)
-      .then(res => this.setState({ friends: res.data }))
-      .catch(err => { throw new Error(err)});
-  }
+    axios
+    .get('http://localhost:5000/friends')
+      .then(response => {
+        this.setState({friends: response.data});
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
+
+  postToServer = info => {
+    axios
+    .post('http://localhost:5000/friends', info)
+      .then(response => {
+        this.setState({
+          friends: [
+            ...this.state.friends,
+            info
+          ],
+          postSuccess: true
+        });
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
+
+  updateToServer = (info, id) => {
+    axios
+    .put(`http://localhost:5000/friends/${id}`, info)
+      .then(response => {
+        this.setState({
+          friends: response.data
+        });
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
+
+  deleteFromServer = id => {
+    axios
+    .delete(`http://localhost:5000/friends/${id}`)
+      .then(response => {
+        this.setState({
+          friends: response.data,
+          deleteSuccess: true
+        });
+      })
+      .catch(err => console.log(err));
+  };
+
+  removeSuccessMessage = () => {
+    this.setState({postSuccess: false});
+  };
+
+  removeDeleteMessage = () => {
+    this.setState({deleteSuccess: false});
+  };
+
   render() {
     return (
-      <div className="App">
-        <Route exact path="/" render={props => (
-          <FriendsList 
-            {...props}
-            friends={this.state.friends}
-            deleteFriend={this.handleDeleteFriend}
-            editFriend={this.handleEditFriend}
-          />
-        )} />
-        <Route path="/add" render={props => <FriendInput {...props} updateList={this.handleUpdateList} />} />
-      </div>
+      <AppContainer>
+        <Route
+          path='/'
+          render={(props) =>
+            <FriendsList {...props}
+              friends={this.state.friends}
+              deleteFromServer={this.deleteFromServer}
+              removeDeleteMessage={this.removeDeleteMessage}
+            />
+          }
+        />
+        <InputFormContainer>
+          <FixedMenu>
+            <Route path='/' component={Menu} />
+            {this.state.postSuccess ? <PostMessage/> : null}
+            {this.state.deleteSuccess ? <DeleteMessage/> : null}
+            <Route
+              path='/post'
+              render={(props) =>
+                <PostForm {...props}
+                  postToServer={this.postToServer}
+                  removeSuccessMessage={this.removeSuccessMessage}
+                />
+              }
+            />
+            <Route
+              path='/update'
+              render={(props) =>
+                <UpdateForm {...props}
+                  updateToServer={this.updateToServer}
+                  friends={this.state.friends}
+                />
+              }
+            />
+          </FixedMenu>
+        </InputFormContainer>
+      </AppContainer>
     );
   }
 }
 
 export default App;
-
