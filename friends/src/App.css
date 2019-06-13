@@ -1,9 +1,11 @@
 .HomeLink {
   background: #FAFAFA;
+  color: black;
+  text-decoration: none;
   border: 1px solid black;
   display: block;
   margin: 10px;
   padding: 10px;
-  width: 44px;
+  width: 53px;
 
 }

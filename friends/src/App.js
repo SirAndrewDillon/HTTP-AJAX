@@ -1,7 +1,8 @@
 import React, { Component, Fragment } from 'react';
 import { Route, Link } from 'react-router-dom';
-import FrontPage from './FrontPage';
-import FriendPage from './FriendPage';
+import FrontPage from './components/FrontPage';
+import FriendPage from './components/FriendPage';
+import Example from './components/Example';
 import axios from 'axios';
 import './App.css';
 
@@ -21,13 +22,13 @@ class App extends Component {
   // }
 
   handleChange = (e) => {
-    e.preventDefault();
+    // e.preventDefault();
     this.setState({ [e.target.name]: e.target.value})
     console.log(e.target.value)
   }
 
   handleSubmit = (e) => {
-    // e.preventDefault();
+    e.preventDefault();
     const user = {
       name: this.state.name,
       age: parseInt(this.state.age),
