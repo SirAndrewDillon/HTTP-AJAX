@@ -1,72 +1,70 @@
-import React from 'react';
+import React, { Component } from 'react';
+import axios from 'axios';
 
-class Friend extends React.Component {
-    constructor(props){
-        super(props);
-        this.state = {
-            editing: false,
-            nameInput: this.props.name,
-            ageInput: this.props.age,
-            emailInput: this.props.email,
-        };
-    }
-    handleInput = (e, type) => {
-        const key = type + 'Input';
-        this.setState({ [key]: e.target.value });
-    }
-    handleEdit = (e) => {
-        e.preventDefault();
-        if (!this.state.nameInput || !this.state.ageInput || !this.state.emailInput) return alert('Please fill out all fields');
-        this.props.handleUpdate(this.state.nameInput, this.state.ageInput, this.state.emailInput, this.props.id);
+import EditFriend from './EditFriend';
+
+class Friend extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      editForm: false,
+      editFriend: {
+        name: '',
+        age: '',
+        email: ''
+      }
+    };
+  }
+
+  toggleForm = e => {
+    e.preventDefault();
+    this.setState({ editForm: !this.state.editForm });
+  };
+
+  editFriendHandler = e => {
+    this.setState({
+      editFriend: {
+        ...this.state.editFriend,
+        [e.target.name]: e.target.value
+      }
+    });
+  }
+
+  saveEditFriend = e => {
+    e.preventDefault();
+    axios.put(`http://localhost:5000/friends/${this.props.friend.id}`, this.state.editFriend)
+      .then(response => {
+        console.log(response);
+        this.props.handleSetData(response.data);
         this.setState({
-            editing: false,
-        });
-    }
-    render(){
-        return this.state.editing ? (
-            <form onSubmit={this.handleEdit}>
-                <p>
-                    <span>Name:</span> 
-                    <input type="text" 
-                        placeholder="Name" 
-                        value={this.state.nameInput} 
-                        onChange={(e) => this.handleInput(e, 'name')} 
-                    />
-                </p>
-                <p>
-                    <span>Age:</span> 
-                    <input type="number" 
-                        placeholder="Age" 
-                        value={this.state.ageInput} 
-                        onChange={(e) => this.handleInput(e, 'age')}  
-                    />
-                </p>
-                <p>
-                    <span>Email:</span> 
-                    <input type="email" 
-                        placeholder="Email" 
-                        value={this.state.emailInput} 
-                        onChange={(e) => this.handleInput(e, 'email')}  
-                    />
-                </p>
-                <button className = 'modify'>Submit</button>
-                <div className="icons">
-                    <span className="fas fa-undo-alt edit" onClick={() => this.setState({ editing: false })}></span>
-                    <span className="fas fa-times-circle delete" onClick={ () => this.props.deleteFriend(this.props.id)}></span>    
-                </div>
-            </form>
-        ) : (
-            <div>
-                <p><span>Name:</span> {this.props.name}</p>
-                <p><span>Age:</span> {this.props.age}</p>
-                <p><span>Email:</span> {this.props.email}</p>
-                <section className="icons">
-                    <span className="fas fa-user-edit edit" onClick={ () => this.setState({ editing: true })}>edit</span>
-                    <span className="fas fa-times-circle delete" onClick={() => this.props.deleteFriend(this.props.id)}>delete</span>
-                </section>
-            </div>
-        );
-    }
+          editFriend: {
+            name: '',
+            age: '',
+            email: ''
+          }
+        })
+      })
+      .catch(err => console.log(err));
+  }
+
+  render() {
+    const { friend, handleDeleteFriend } = this.props;
+    const { editForm, editFriend } = this.state;
+
+    return (
+      <div>
+        <p>name: {friend.name}</p>
+        <p>age: {friend.age}</p>
+        <p>email: {friend.email}</p>
+
+        {editForm ? <EditFriend friend={editFriend} editFriendHandler={this.editFriendHandler} saveEditFriend={this.saveEditFriend} /> : null}
+
+        <button onClick={this.toggleForm}>Edit</button>
+        <button onClick={e => (handleDeleteFriend(e, friend.id))}>Delete</button>
+        <hr />
+      </div>
+    );
+  }
 }
 
 export default Friend;
