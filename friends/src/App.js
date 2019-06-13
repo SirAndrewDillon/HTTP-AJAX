@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 
-import FriendsList from './components/FriendsList';
+import FriendsList from './components/FriendPage';
 import NewFriend from './components/NewFriend';
 
 import './App.css';
